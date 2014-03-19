@@ -1,11 +1,81 @@
-/*
- * jQuery FlexSlider v2.2.2
+/*!
+ * jQuery FlexSlider v2.2.0
  * Copyright 2012 WooThemes
  * Contributing Author: Tyler Smith
- */
-;
-(function ($) {
+ !*/
+ var flexslider_customization_margin= 10;
+ var flexslider_customization_left= 30;
+ var nextPreviousLink_width = 30;
+ var nextPreviousLink_width_double_with_margins = (nextPreviousLink_width + flexslider_customization_margin)*2 ;
+  
+ function carouselTextMove() {
+	var textId = $(".flex-active-slide").find(".textBg").attr('id');
+	var text = "#" + textId;
+	if ($(window).width() < 768) {
+		$(".mobileText").html("");
+		$(".mobileText").append($(text).clone().html()).find(".heading").wrap( "<a href='"+$(".flex-active-slide").find("a").attr('href')+"'></a>");
+		//"<a hred>"$(text).clone().appendTo
+	}
+ }
+ 
+ 	function firstSlideWidth(){
+		carouselTextMove();
+		//katsotaan elementin leveys
+		//var firstElement =  document.getElementById("flex-active-start");
+		if($("#flex-active-start") && $("#flex-active-start").length>0){
+			var firstImgWidth =  $("#flex-active-start").width();
+			//otetaan elementin leveydestä seuraava/edellinen-nappien levyinen palsta pois
+			var setElementWidth = firstImgWidth;
+			//säädetään kokonaistyyli
+			var setElementStyle = "width: " + setElementWidth + "px;float: left; display: block; position: relative; margin-right: " + flexslider_customization_margin + "px; margin-left:" + flexslider_customization_margin + "px; left: " + flexslider_customization_left + "px;";
+			//asetetaan kaikille karusellin kuville sama koko jottei kuvat hypi
+			var setCarouselImgWidth = "width: " + setElementWidth + "px;"; 
+			//muutetaan kuvien koot
+			$('.slides li img').attr('style', setCarouselImgWidth);
+			$('.kumppaniteippi').attr('style', 'width: auto;');
+			//muutetaan ensimmäisen sliden koko ja muut tyylit
+			$('#flex-active-start').attr('style', setElementStyle);
+		}
+		
+	}
+	
+	function activeSlideWidth(moveText){
+		
+		if (moveText == 1){
+			carouselTextMove();
+		}
+		if($(".flexslider .clone") && $(".flexslider .clone").length>0){
+			//katsotaan elementin leveys
+			var firstImgWidth =  $(".flexslider .clone").width();
+			//otetaan elementin leveydestä seuraava/edellinen-nappien levyinen palsta pois
+			var setElementWidth = firstImgWidth;
+			//säädetään kokonaistyyli
+			var setElementStyle = "width: " + setElementWidth + "px;float: left; display: block; position: relative; margin-right: " + flexslider_customization_margin + "px; margin-left:" + flexslider_customization_margin + "px; left: " + flexslider_customization_left + "px;";
+			//asetetaan kaikille karusellin kuville sama koko jottei kuvat hypi
+			var setCarouselImgWidth = "width: " + setElementWidth + "px;"; 
+			//muutetaan kuvien koot
+			$('.slides li img').attr('style', setCarouselImgWidth);
+			$('.kumppaniteippi').attr('style', 'width: auto;');
+			//muutetaan ensimmäisen sliden koko ja muut tyylit
+			$('.flex-active-slide').attr('style', setElementStyle);
+			
+		}
+	}
 
+$(window).load(function() { 
+	setTimeout( function(){ activeSlideWidth(1); }, 200); 
+});
+
+$( document ).ready(function() {
+	carouselTextMove();	
+});	
+
+$(window).resize(function() { //kun ikkunan koko muutetaan
+	setTimeout( function(){ activeSlideWidth(); }, 500); 
+	 });
+
+(function ($) {
+  
   //FlexSlider: Object Instance
   $.flexslider = function(el, options) {
     var slider = $(el);
@@ -37,7 +107,7 @@
       init: function() {
         slider.animating = false;
         // Get current slide and make sure it is a number
-        slider.currentSlide = parseInt( ( slider.vars.startAt ? slider.vars.startAt : 0), 10 );
+        slider.currentSlide = parseInt( ( slider.vars.startAt ? slider.vars.startAt : 0) );
         if ( isNaN( slider.currentSlide ) ) slider.currentSlide = 0;
         slider.animatingTo = slider.currentSlide;
         slider.atEnd = (slider.currentSlide === 0 || slider.currentSlide === slider.last);
@@ -157,7 +227,7 @@
           slider.currentItem = slider.currentSlide;
           slider.slides.removeClass(namespace + "active-slide").eq(slider.currentItem).addClass(namespace + "active-slide");
           if(!msGesture){
-              slider.slides.on(eventType, function(e){
+              slider.slides.click(function(e){
                 e.preventDefault();
                 var $slide = $(this),
                     target = $slide.index();
@@ -494,7 +564,6 @@
                                     (reverse) ? (slider.last - slider.currentSlide + slider.cloneOffset) * cwidth : (slider.currentSlide + slider.cloneOffset) * cwidth;
                 }
             }
-
             function onMSGestureChange(e) {
                 e.stopPropagation();
                 var slider = e.target._slider;
@@ -554,14 +623,15 @@
         }
       },
       resize: function() {
-        if (!slider.animating && slider.is(':visible')) {
+       if (!slider.animating && slider.is(':visible')) {
+	    
           if (!carousel) slider.doMath();
 
           if (fade) {
             // SMOOTH HEIGHT:
             methods.smoothHeight();
           } else if (carousel) { //CAROUSEL:
-            slider.slides.width(slider.computedW);
+           slider.slides.width(slider.computedW);	
             slider.update(slider.pagingCount);
             slider.setProps();
           }
@@ -573,6 +643,7 @@
             if (slider.vars.smoothHeight) methods.smoothHeight();
             slider.newSlides.width(slider.computedW);
             slider.setProps(slider.computedW, "setTotal");
+		
           }
         }
       },
@@ -592,13 +663,6 @@
           case "pause": $obj.pause(); break;
         }
       },
-      uniqueID: function($clone) {
-        $clone.find( '[id]' ).each(function() {
-          var $this = $(this);
-          $this.attr( 'id', $this.attr( 'id' ) + '_clone' );
-        });
-        return $clone;
-      },
       pauseInvisible: {
         visProp: null,
         init: function() {
@@ -606,7 +670,7 @@
 
           if ('hidden' in document) return 'hidden';
           for (var i = 0; i < prefixes.length; i++) {
-            if ((prefixes[i] + 'Hidden') in document)
+            if ((prefixes[i] + 'Hidden') in document) 
             methods.pauseInvisible.visProp = prefixes[i] + 'Hidden';
           }
           if (methods.pauseInvisible.visProp) {
@@ -621,7 +685,7 @@
                 else (slider.vars.initDelay > 0) ? setTimeout(slider.play, slider.vars.initDelay) : slider.play(); //Didn't init before: simply init or wait for it
               }
             });
-          }
+          }       
         },
         isHidden: function() {
           return document[methods.pauseInvisible.visProp] || false;
@@ -633,7 +697,7 @@
           watchedEvent = "";
         }, 3000);
       }
-    };
+    }
 
     // public methods
     slider.flexAnimate = function(target, pause, override, withSync, fromNav) {
@@ -671,6 +735,8 @@
         // API: before() animation Callback
         slider.vars.before(slider);
 
+	
+		
         // SYNC:
         if (slider.syncExists && !fromNav) methods.sync("animate");
 
@@ -679,9 +745,23 @@
 
         // !CAROUSEL:
         // CANDIDATE: slide active class (for add/remove slide)
-        if (!carousel) slider.slides.removeClass(namespace + 'active-slide').eq(target).addClass(namespace + 'active-slide');
-
-        // INFINITE LOOP:
+        if (!carousel) {
+			var activeWidth = slider.computedW-nextPreviousLink_width_double_with_margins;
+			slider.slides.css({"width": slider.computedW, "float": "left", "display": "block", "position": "relative", "margin-right":"0px", "margin-left": "0px"});
+			$(".clone").css({"margin-left":"0px","margin-right":"0px"});
+			if(target==0 && slider.direction=="next"){
+			$(".clone").last().css({"margin-left":"10px","margin-right":"0px"});
+			}
+			if(target==(slider.count-1)&& slider.direction=="prev"){
+			$(".clone").first().css({"margin-right":"10px","margin-left":"-10px"});
+			}
+			//slider.slides.first().css({"margin-left":"10px","margin-right":"0px"});
+			slider.slides.removeClass(namespace + 'active-slide').eq(target).addClass(namespace + 'active-slide');
+			slider.slides.eq(target).css({"width": slider.computedW, "float": "left", "display": "block", "position": "relative", "margin-right": flexslider_customization_margin+"px", "margin-left": flexslider_customization_margin+"px"});
+			
+			carouselTextMove();
+        }
+		// INFINITE LOOP:
         // CANDIDATE: atEnd
         slider.atEnd = target === 0 || target === slider.last;
 
@@ -708,12 +788,25 @@
             slideString = (calcNext > slider.limit && slider.visible !== 1) ? slider.limit : calcNext;
           } else if (slider.currentSlide === 0 && target === slider.count - 1 && slider.vars.animationLoop && slider.direction !== "next") {
             slideString = (reverse) ? (slider.count + slider.cloneOffset) * dimension : 0;
+			slideString = slideString - flexslider_customization_margin;
+			
+			if(target==(slider.count-1)&& slider.direction=="prev"){
+			
+				slideString = slideString - flexslider_customization_margin;
+			}
+			
           } else if (slider.currentSlide === slider.last && target === 0 && slider.vars.animationLoop && slider.direction !== "prev") {
             slideString = (reverse) ? 0 : (slider.count + 1) * dimension;
+			
+			slideString = slideString + (flexslider_customization_margin);
+		if(target==0 && slider.direction=="next"){
+					slideString = slideString + (flexslider_customization_margin);
+					}
           } else {
-            slideString = (reverse) ? ((slider.count - 1) - target + slider.cloneOffset) * dimension : (target + slider.cloneOffset) * dimension;
+            slideString = (reverse) ? ((slider.count - 1) - target + slider.cloneOffset) * dimension : (target + slider.cloneOffset) * dimension;	
           }
           slider.setProps(slideString, "", slider.vars.animationSpeed);
+		
           if (slider.transitions) {
             if (!slider.vars.animationLoop || !slider.atEnd) {
               slider.animating = false;
@@ -745,7 +838,7 @@
         // SMOOTH HEIGHT:
         if (slider.vars.smoothHeight) methods.smoothHeight(slider.vars.animationSpeed);
       }
-    };
+    }
     slider.wrapup = function(dimension) {
       // SLIDE:
       if (!fade && !carousel) {
@@ -756,15 +849,23 @@
         }
       }
       slider.animating = false;
+	  
+	  
       slider.currentSlide = slider.animatingTo;
-      // API: after() animation Callback
+      
+	  // API: after() animation Callback
       slider.vars.after(slider);
-    };
+	  
+
+		//Added for VR 17.1.2014
+	  methods.resize();
+	  activeSlideWidth();
+    }
 
     // SLIDESHOW:
     slider.animateSlides = function() {
       if (!slider.animating && focused ) slider.flexAnimate(slider.getTarget("next"));
-    };
+    }
     // SLIDESHOW:
     slider.pause = function() {
       clearInterval(slider.animatedSlides);
@@ -774,7 +875,7 @@
       if (slider.vars.pausePlay) methods.pausePlay.update("play");
       // SYNC:
       if (slider.syncExists) methods.sync("pause");
-    };
+    }
     // SLIDESHOW:
     slider.play = function() {
       if (slider.playing) clearInterval(slider.animatedSlides);
@@ -784,12 +885,12 @@
       if (slider.vars.pausePlay) methods.pausePlay.update("pause");
       // SYNC:
       if (slider.syncExists) methods.sync("play");
-    };
+    }
     // STOP:
     slider.stop = function () {
       slider.pause();
       slider.stopped = true;
-    };
+    }
     slider.canAdvance = function(target, fromNav) {
       // ASNAV:
       var last = (asNav) ? slider.pagingCount - 1 : slider.last;
@@ -801,7 +902,7 @@
              (slider.atEnd && slider.currentSlide === 0 && target === last && slider.direction !== "next") ? false :
              (slider.atEnd && slider.currentSlide === last && target === 0 && slider.direction === "next") ? false :
              true;
-    };
+    }
     slider.getTarget = function(dir) {
       slider.direction = dir;
       if (dir === "next") {
@@ -809,7 +910,7 @@
       } else {
         return (slider.currentSlide === 0) ? slider.last : slider.currentSlide - 1;
       }
-    };
+    }
 
     // SLIDE:
     slider.setProps = function(pos, special, dur) {
@@ -839,14 +940,12 @@
         target = (vertical) ? "translate3d(0," + target + ",0)" : "translate3d(" + target + ",0,0)";
         dur = (dur !== undefined) ? (dur/1000) + "s" : "0s";
         slider.container.css("-" + slider.pfx + "-transition-duration", dur);
-         slider.container.css("transition-duration", dur);
       }
 
       slider.args[slider.prop] = target;
       if (slider.transitions || dur === undefined) slider.container.css(slider.args);
-
-      slider.container.css('transform',target);
-    };
+	  
+    }
 
     slider.setup = function(type) {
       // SLIDE:
@@ -870,10 +969,11 @@
           slider.cloneCount = 2;
           slider.cloneOffset = 1;
           // clear out old clones
+		  var activeWidth = slider.computedW-nextPreviousLink_width_double_with_margins;
+			slider.slides.css({"width": activeWidth, "float": "left", "display": "block", "position": "relative", "margin-right": "0px", "margin-left": "0px", "left": flexslider_customization_left + "px"});
+			
           if (type !== "init") slider.container.find('.clone').remove();
-          // slider.container.append(slider.slides.first().clone().addClass('clone').attr('aria-hidden', 'true')).prepend(slider.slides.last().clone().addClass('clone').attr('aria-hidden', 'true'));
-		      methods.uniqueID( slider.slides.first().clone().addClass('clone').attr('aria-hidden', 'true') ).appendTo( slider.container );
-		      methods.uniqueID( slider.slides.last().clone().addClass('clone').attr('aria-hidden', 'true') ).prependTo( slider.container );
+          slider.container.append(slider.slides.first().clone().addClass('clone').attr('aria-hidden', 'true')).prepend(slider.slides.last().clone().addClass('clone').attr('aria-hidden', 'true'));
         }
         slider.newSlides = $(slider.vars.selector, slider);
 
@@ -892,13 +992,13 @@
           slider.setProps(sliderOffset * slider.computedW, "init");
           setTimeout(function(){
             slider.doMath();
-            slider.newSlides.css({"width": slider.computedW, "float": "left", "display": "block"});
+            slider.newSlides.css({"width": slider.computedW, "float": "left", "display": "block", "position": "relative", "left": flexslider_customization_left + "px"});
             // SMOOTH HEIGHT:
             if (slider.vars.smoothHeight) methods.smoothHeight();
           }, (type === "init") ? 100 : 0);
-        }
+        }		
       } else { // FADE:
-        slider.slides.css({"width": "100%", "float": "left", "marginRight": "-100%", "position": "relative"});
+        slider.slides.css({"width": "100%", "float": "left", "position": "relative", "left": flexslider_customization_left + "px"});
         if (type === "init") {
           if (!touch) {
             //slider.slides.eq(slider.currentSlide).fadeIn(slider.vars.animationSpeed, slider.vars.easing);
@@ -912,11 +1012,12 @@
       }
       // !CAROUSEL:
       // CANDIDATE: active slide
-      if (!carousel) slider.slides.removeClass(namespace + "active-slide").eq(slider.currentSlide).addClass(namespace + "active-slide");
+      if (!carousel) {
+		slider.slides.removeClass(namespace + "active-slide").eq(slider.currentSlide).addClass(namespace + "active-slide");
+		slider.slides.eq(slider.currentSlide).attr("id", "flex-active-start");
+		}
+    }
 
-      //FlexSlider: init() Callback
-      slider.vars.init(slider);
-    };
 
     slider.doMath = function() {
       var slide = slider.slides.first(),
@@ -948,8 +1049,10 @@
         slider.pagingCount = slider.count;
         slider.last = slider.count - 1;
       }
-      slider.computedW = slider.itemW - slider.boxPadding;
-    };
+      slider.computedW = slider.itemW - slider.boxPadding - nextPreviousLink_width_double_with_margins;
+	  
+    }
+
 
     slider.update = function(pos, action) {
       slider.doMath();
@@ -979,7 +1082,7 @@
       // update directionNav
       if (slider.vars.directionNav) methods.directionNav.update();
 
-    };
+    }
 
     slider.addSlide = function(obj, pos) {
       var $obj = $(obj);
@@ -1004,7 +1107,7 @@
 
       //FlexSlider: added() Callback
       slider.vars.added(slider);
-    };
+    }
     slider.removeSlide = function(obj) {
       var pos = (isNaN(obj)) ? slider.slides.index($(obj)) : obj;
 
@@ -1030,11 +1133,12 @@
 
       // FlexSlider: removed() Callback
       slider.vars.removed(slider);
-    };
+    }
 
     //FlexSlider: Initialize
     methods.init();
-  };
+	
+  }
 
   // Ensure the slider isn't focussed if the window loses focus.
   $( window ).blur( function ( e ) {
@@ -1047,33 +1151,33 @@
   $.flexslider.defaults = {
     namespace: "flex-",             //{NEW} String: Prefix string attached to the class of every element generated by the plugin
     selector: ".slides > li",       //{NEW} Selector: Must match a simple pattern. '{container} > {slide}' -- Ignore pattern at your own peril
-    animation: "fade",              //String: Select your animation type, "fade" or "slide"
+    animation: "slide",              //String: Select your animation type, "fade" or "slide"
     easing: "swing",                //{NEW} String: Determines the easing method used in jQuery transitions. jQuery easing plugin is supported!
     direction: "horizontal",        //String: Select the sliding direction, "horizontal" or "vertical"
     reverse: false,                 //{NEW} Boolean: Reverse the animation direction
     animationLoop: true,            //Boolean: Should the animation loop? If false, directionNav will received "disable" classes at either end
     smoothHeight: false,            //{NEW} Boolean: Allow height of the slider to animate smoothly in horizontal mode
     startAt: 0,                     //Integer: The slide that the slider should start on. Array notation (0 = first slide)
-    slideshow: true,                //Boolean: Animate slider automatically
-    slideshowSpeed: 7000,           //Integer: Set the speed of the slideshow cycling, in milliseconds
-    animationSpeed: 600,            //Integer: Set the speed of animations, in milliseconds
+    slideshow: false,                //Boolean: Animate slider automatically
+    slideshowSpeed: 8000,           //Integer: Set the speed of the slideshow cycling, in milliseconds
+    animationSpeed: 1000,            //Integer: Set the speed of animations, in milliseconds
     initDelay: 0,                   //{NEW} Integer: Set an initialization delay, in milliseconds
     randomize: false,               //Boolean: Randomize slide order
     thumbCaptions: false,           //Boolean: Whether or not to put captions on thumbnails when using the "thumbnails" controlNav.
 
     // Usability features
     pauseOnAction: true,            //Boolean: Pause the slideshow when interacting with control elements, highly recommended.
-    pauseOnHover: false,            //Boolean: Pause the slideshow when hovering over slider, then resume when no longer hovering
+    pauseOnHover: true,            //Boolean: Pause the slideshow when hovering over slider, then resume when no longer hovering
     pauseInvisible: true,   		//{NEW} Boolean: Pause the slideshow when tab is invisible, resume when visible. Provides better UX, lower CPU usage.
     useCSS: true,                   //{NEW} Boolean: Slider will use CSS3 transitions if available
     touch: true,                    //{NEW} Boolean: Allow touch swipe navigation of the slider on touch-enabled devices
     video: false,                   //{NEW} Boolean: If using video in the slider, will prevent CSS3 3D Transforms to avoid graphical glitches
 
     // Primary Controls
-    controlNav: true,               //Boolean: Create navigation for paging control of each clide? Note: Leave true for manualControls usage
+    controlNav: false,               //Boolean: Create navigation for paging control of each clide? Note: Leave true for manualControls usage
     directionNav: true,             //Boolean: Create navigation for previous/next navigation? (true/false)
-    prevText: "Previous",           //String: Set the text for the "previous" directionNav item
-    nextText: "Next",               //String: Set the text for the "next" directionNav item
+    prevText: "",           //String: Set the text for the "previous" directionNav item
+    nextText: "",               //String: Set the text for the "next" directionNav item
 
     // Secondary Navigation
     keyboard: true,                 //Boolean: Allow slider navigating via keyboard left/right keys
@@ -1103,9 +1207,9 @@
     after: function(){},            //Callback: function(slider) - Fires after each slider animation completes
     end: function(){},              //Callback: function(slider) - Fires when the slider reaches the last slide (asynchronous)
     added: function(){},            //{NEW} Callback: function(slider) - Fires after a slide is added
-    removed: function(){},           //{NEW} Callback: function(slider) - Fires after a slide is removed
-    init: function() {}             //{NEW} Callback: function(slider) - Fires after the slider is initially setup
-  };
+    removed: function(){}           //{NEW} Callback: function(slider) - Fires after a slide is removed
+  }
+
 
   //FlexSlider: Plugin Function
   $.fn.flexslider = function(options) {
@@ -1137,5 +1241,5 @@
         default: if (typeof options === "number") $slider.flexAnimate(options, true);
       }
     }
-  };
+  }
 })(jQuery);
